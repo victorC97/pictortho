@@ -26,6 +26,7 @@ def get_pictos(sentence):
     res = []
     # Replace verb to standard form
     temp_sentence = copy.deepcopy(sentence)
+    temp_sentence = temp_sentence.lower()
     for word in st.session_state.verbs["Infinitif"]:
         temp_sentence = re.subn(word, st.session_state.verbs["Infinitif"][word], temp_sentence)[0]
     # Match words
@@ -130,58 +131,3 @@ with NamedTemporaryFile() as tmp:
     download = st.download_button(label="Télécharger", data=stream,
                                   file_name=f"pictortho_{tmp.name.split('.')[0].split('/')[-1]}.docx",
                                   mime="application/msword")
-
-# if sentence != "":
-#     res = []
-#     # Replace verb to standard form
-#     temp_sentence = copy.deepcopy(sentence)
-#     for word in st.session_state.verbs["Infinitif"]:
-#         temp_sentence = re.subn(word, st.session_state.verbs["Infinitif"][word], temp_sentence)[0]
-#     # Match words
-#     for word in st.session_state.table["Pictogrammes"]:
-#         match = re.search(word, temp_sentence)
-#         if match:
-#             res.append({"word": word, "span": match.span()})
-#     # Remove doublon aliments de dinette -> aliments de dinette + dinette : need to remove dinette
-#     remove = []
-#     for i in range(len(res)):
-#         o = res[i]
-#         o_span = o["span"]
-#         others = res[:i] + res[i + 1:]
-#         for other in others:
-#             other_span = other["span"]
-#             if o_span[0] >= other_span[0] and o_span[1] <= other_span[1]:
-#                 remove.append(o["word"])
-#     for r in remove:
-#         res = [o for o in res if o["word"] not in remove]
-#     # Sort result
-#     res_data = {"word": [], "order": [], "picto": []}
-#     for o in res:
-#         res_data["word"].append(o["word"])
-#         res_data["order"].append(int(o["span"][0]))
-#         res_data["picto"].append(st.session_state.table["Pictogrammes"][o["word"]])
-#     res_df = pd.DataFrame(res_data).sort_values(by="order").reset_index(drop=True)
-#     document = docx.Document()
-#     document.add_heading('PictOrtho', 0)
-#     p = document.add_paragraph("")
-#     p.add_run("Phrase :").bold = True
-#     p2 = document.add_paragraph(sentence)
-#     p3 = document.add_paragraph("")
-#     p3.add_run("Traduction :").bold = True
-#     grid = document.add_paragraph()
-#     r = grid.add_run()
-#     for i in range(0, res_df.shape[0], 5):
-#         columns = st.columns(5)
-#         for index, row in res_df.iloc[i:i + 5].iterrows():
-#             with columns[index % 5]:
-#                 st.image(f"pictos/{row['picto']}", width=250)
-#                 r.add_picture(f"pictos/{row['picto']}", width=Inches(1.2), height=Inches(1.2))
-#                 r.add_text(" ")
-#
-# with NamedTemporaryFile() as tmp:
-#     document.save(tmp.name)
-#     tmp.seek(0)
-#     stream = tmp.read()
-#     download = st.download_button(label="Télécharger", data=stream,
-#                                   file_name=f"pictortho_{tmp.name.split('.')[0].split('/')[-1]}.docx",
-#                                   mime="application/msword")
