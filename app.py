@@ -106,7 +106,7 @@ with elements("app-bar"):
                     display="flex", alignItems="center"
                 )
 
-st.markdown("#### Titre du document :")
+st.markdown("#### Titre du document à générer:")
 
 title = st.text_input("Titre du document :", label_visibility="collapsed")
 
@@ -149,8 +149,14 @@ if st.button("Générer"):
             r = grid.add_run()
             for i in range(0, len(st.session_state.sentences[key]["res"]), 8):
                 for index in range(len(st.session_state.sentences[key]["res"][i:i + 8])):
-                    if st.session_state[f'sentence{key}_si_{i}_{index}'] != "":
-                        r.add_picture(f"{st.session_state[f'sentence{key}_si_{i}_{index}']}", width=Inches(1.2), height=Inches(1.2))
+                    search_si = f'sentence{key}_si_{i}_{index}'
+                    sis = [key for key in st.session_state if re.search(search_si, key)]
+                    if len(sis) == 1:
+                        si = sis[0]
+                    else:
+                        st.error(sis)
+                    if st.session_state[si] != "":
+                        r.add_picture(f"{st.session_state[si]}", width=Inches(1.2), height=Inches(1.2))
                         r.add_text(" ")
 
     with NamedTemporaryFile() as tmp:
@@ -166,5 +172,5 @@ if stream:
 for i in range(10):
     st.markdown("")
 
-st.markdown(f'<div style="text-align: center;">Tous pictogrammes présents sur Pictortho provient de la base de données d\'<a href="https://arasaac.org">ARASAAC</a>.</div>', unsafe_allow_html=True)
-st.markdown(f'<div style="text-align: center;">Pictortho est disponible en libre accès sur <a href="https://arasaac.org">Github</a>.</div>', unsafe_allow_html=True)
+st.markdown(f'<div style="text-align: center;">Tous pictogrammes présents sur Pictortho proviennent de la base de données d\'<a href="https://arasaac.org">ARASAAC</a> dont les termes d\'utilisations sont accessibles <a href="https://arasaac.org/terms-of-use">ici</a>.</div>', unsafe_allow_html=True)
+st.markdown(f'<div style="text-align: center;">Pictortho est disponible en libre accès sur <a href="https://github.com/victorC97/pictortho">Github</a>.</div>', unsafe_allow_html=True)
