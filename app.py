@@ -12,19 +12,19 @@ from streamlit_elements import elements, mui, html, lazy, sync
 # HEADERS AND BEAUTIFY
 st.set_page_config(page_title="Pictortho", layout="wide", page_icon="icon.png")
 
-with open("style.css") as css:
+with open("static/style.css") as css:
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
-with open('logo.svg', 'r') as svg:
+with open('static/logo.svg', 'r') as svg:
     b64 = base64.b64encode(svg.read().encode('utf-8')).decode("utf-8")
 
-with open('logo_ARASAAC.png', 'rb') as f:
+with open('static/logo_ARASAAC.png', 'rb') as f:
     arasaac = base64.b64encode(f.read())
 
 # NEEDED VARIABLES
 
 if "table" not in st.session_state:
-    st.session_state.table = pd.read_csv("table.csv", sep="\t", index_col=0)
+    st.session_state.table = pd.read_csv("static/table.csv", sep="\t", index_col=0)
     # GETTING LISTS
     commas_columns = ["_id", "Pictogramme", "Conjugaison", "schematic", "sex", "violence", "aac", "aacColor", "skin",
                       "hair", "downloads"]
@@ -37,7 +37,7 @@ if "table" not in st.session_state:
             lambda string: string.split(":") if type(string) is str else string)
 
 if "verbs" not in st.session_state:
-    st.session_state.verbs = pd.read_csv("conjugaison.csv", sep=";").set_index("Mots conjugués")
+    st.session_state.verbs = pd.read_csv("static/conjugaison.csv", sep=";").set_index("Mots conjugués")
     st.session_state.verbs = st.session_state.verbs[~st.session_state.verbs.index.duplicated(keep='first')]
 
 if "sentences" not in st.session_state:
