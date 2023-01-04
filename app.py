@@ -21,6 +21,9 @@ with open('static/logo.svg', 'r') as svg:
 with open('static/logo_ARASAAC.png', 'rb') as f:
     arasaac = base64.b64encode(f.read())
 
+with open("README.md", "r") as f:
+    readme = f.readlines()
+
 # NEEDED VARIABLES
 
 if "table" not in st.session_state:
@@ -46,6 +49,10 @@ if "sentences" not in st.session_state:
 if "count" not in st.session_state:
     st.session_state.count = 1
 
+if "manuel_file" not in st.session_state:
+    with open("static/manuel.md", "r") as f:
+        st.session_state.manuel_file = f.read()
+
 
 # UTILS
 def add_sentence():
@@ -53,7 +60,7 @@ def add_sentence():
     st.session_state.count += 1
 
 
-def delete_sentence(i):
+def delete_sentence(i: int):
     def delete_sentencei():
         del st.session_state.sentences[str(i)]
         del st.session_state[f"sentence{i}"]
@@ -62,7 +69,7 @@ def delete_sentence(i):
     return delete_sentencei
 
 
-def get_pictos(sentence):
+def get_pictos(sentence: str):
     res = []
     # Replace verb to standard form
     temp_sentence = copy.deepcopy(sentence)
@@ -89,11 +96,95 @@ def get_pictos(sentence):
         j += len(res[str(j)]["words"].split(" ")) if str(j) in res else 1
     return [res[key]["data"] for key in res]
 
-def go_to_github():
-    link = "https://github.com/victorC97/pictortho"
+
+def set_mode(mode: str):
+    st.session_state.mode = mode
+
+
+def pictortho_page():
+    st.markdown("#### Titre du document à générer:")
+
+    title = st.text_input("Titre du document :", label_visibility="collapsed")
+
+    st.markdown("#### Phrases à traduire :")
+
+    stream = None
+    nb_line = 1
+    for key in st.session_state.sentences:
+        info = st.session_state.sentences[key]
+        line = st.columns([33, 1])
+        with line[0]:
+            st.session_state.sentences[key]["sentence"] = st.text_input(label=f"sentence{key}", value="",
+                                                                        label_visibility="collapsed",
+                                                                        key=f"sentence{key}")
+        with line[1]:
+            if info["role"] == "add":
+                st.button(label="\+", key="add_sentence", on_click=lambda: add_sentence())
+            elif info["role"] == "remove":
+                st.button(label=" \- ", key=f"sentence{key}_remove", on_click=delete_sentence(key))
+        st.session_state.sentences[key]["columns"] = []
+        if st.session_state[f"sentence{key}"] != "":
+            with st.spinner("Traduction en cours..."):
+                st.session_state.sentences[key]["res"] = get_pictos(st.session_state[f"sentence{key}"])
+            for i in range(0, len(st.session_state.sentences[key]["res"]), 8):
+                st.session_state.sentences[key]["columns"].append(st.columns(8))
+                for index in range(len(st.session_state.sentences[key]["res"][i:i + 8])):
+                    with st.session_state.sentences[key]["columns"][i % 8][index % 8]:
+                        infos = st.session_state.sentences[key]["res"][i:i + 8][index]
+                        select_im = stsi.st_select_image(
+                            options=[f"pictos/{info}" for info in infos["Pictogramme"].iloc[0]],
+                            label=f"{infos['Mots écrits'].iloc[0]}", no_choice=True,
+                            key=f"sentence{key}_si_{i}_{index}_{infos['Mots écrits'].iloc[0]}")
+
+    if st.button("Générer"):
+        with st.spinner("Génération du document Word..."):
+            document = docx.Document()
+            document.add_heading(title, 0)
+            for key in st.session_state.sentences:
+                document.add_paragraph("").add_run(f"{nb_line}\\.").bold = True
+                document.add_paragraph(st.session_state[f"sentence{key}"])
+                nb_line += 1
+                grid = document.add_paragraph()
+                r = grid.add_run()
+                for i in range(0, len(st.session_state.sentences[key]["res"]), 8):
+                    for index in range(len(st.session_state.sentences[key]["res"][i:i + 8])):
+                        search_si = f'sentence{key}_si_{i}_{index}'
+                        sis = [key for key in st.session_state if re.search(search_si, key)]
+                        if len(sis) == 1:
+                            si = sis[0]
+                        else:
+                            st.error(sis)
+                        if st.session_state[si] != "":
+                            r.add_picture(f"{st.session_state[si]}", width=Inches(1.2), height=Inches(1.2))
+                            r.add_text(" ")
+
+        with NamedTemporaryFile() as tmp:
+            document.save(tmp.name)
+            tmp.seek(0)
+            stream = tmp.read()
+
+    if stream:
+        download = st.download_button(label="Télécharger", data=stream,
+                                      file_name=f"pictortho_{tmp.name.split('.')[0].split('/')[-1]}.docx",
+                                      mime="application/msword")
+
+
+def set_dictionnaire_result(text: str):
+    st.session_state.dictionnaire_result = st.session_state.table[st.session_state.table.index.str.contains(text)]
+
+
+def dictionnaire():
+    st.markdown("#### Rechercher un pictogramme :")
+    searching_text = st.text_input("Rechercher un pictogramme :", label_visibility="collapsed", key="search_dictionnaire")
+    if len(searching_text) > 1:
+        set_dictionnaire_result(searching_text)
+        st.table(st.session_state.dictionnaire_result)
 
 
 # APP START
+
+if "mode" not in st.session_state:
+    st.session_state.mode = "pictortho"
 
 with elements("app-bar"):
     with mui.Box(sx={"flexGrow": 1}, mx={0}):
@@ -105,72 +196,40 @@ with elements("app-bar"):
                     html.img(src=f"data:image/png;base64,{arasaac.decode()}", width="300px"),
                     display="flex", alignItems="center"
                 )
+                mui.Box(
+                    mui.IconButton(
+                        mui.icon.Create,
+                        onClick=lambda: set_mode("pictortho"),
+                        sx={"color": "black"}
+                    ),
+                    mui.IconButton(
+                        mui.icon.MenuBook,
+                        onClick=lambda: set_mode("manuel"),
+                        sx={"color": "black"}
+                    ),
+                    mui.IconButton(
+                        mui.icon.List,
+                        onClick=lambda: set_mode("dictionnaire"),
+                        sx={"color": "black"}
+                    ),
+                    display="flex", alignItems="center", justifyContent="space-between", width="200px"
+                )
 
-st.markdown("#### Titre du document à générer:")
+if st.session_state.mode == "pictortho":
+    pictortho_page()
 
-title = st.text_input("Titre du document :", label_visibility="collapsed")
+elif st.session_state.mode == "manuel":
+    st.markdown(st.session_state.manuel_file, unsafe_allow_html=True)
 
-st.markdown("#### Phrases à traduire :")
-
-stream = None
-nb_line = 1
-for key in st.session_state.sentences:
-    info = st.session_state.sentences[key]
-    line = st.columns([33, 1])
-    with line[0]:
-        st.session_state.sentences[key]["sentence"] = st.text_input(label=f"sentence{key}", value="",
-                                                                    label_visibility="collapsed", key=f"sentence{key}")
-    with line[1]:
-        if info["role"] == "add":
-            st.button(label="\+", key="add_sentence", on_click=lambda: add_sentence())
-        elif info["role"] == "remove":
-            st.button(label=" \- ", key=f"sentence{key}_remove", on_click=delete_sentence(key))
-    st.session_state.sentences[key]["columns"] = []
-    if st.session_state[f"sentence{key}"] != "":
-        with st.spinner("Traduction en cours..."):
-            st.session_state.sentences[key]["res"] = get_pictos(st.session_state[f"sentence{key}"])
-        for i in range(0, len(st.session_state.sentences[key]["res"]), 8):
-            st.session_state.sentences[key]["columns"].append(st.columns(8))
-            for index in range(len(st.session_state.sentences[key]["res"][i:i + 8])):
-                with st.session_state.sentences[key]["columns"][i % 8][index % 8]:
-                    infos = st.session_state.sentences[key]["res"][i:i + 8][index]
-                    select_im = stsi.st_select_image(options=[f"pictos/{info}" for info in infos["Pictogramme"].iloc[0]],
-                                         label=f"{infos['Mots écrits'].iloc[0]}", no_choice=True, key=f"sentence{key}_si_{i}_{index}_{infos['Mots écrits'].iloc[0]}")
-
-if st.button("Générer"):
-    with st.spinner("Génération du document Word..."):
-        document = docx.Document()
-        document.add_heading(title, 0)
-        for key in st.session_state.sentences:
-            document.add_paragraph("").add_run(f"{nb_line}\\.").bold = True
-            document.add_paragraph(st.session_state[f"sentence{key}"])
-            nb_line += 1
-            grid = document.add_paragraph()
-            r = grid.add_run()
-            for i in range(0, len(st.session_state.sentences[key]["res"]), 8):
-                for index in range(len(st.session_state.sentences[key]["res"][i:i + 8])):
-                    search_si = f'sentence{key}_si_{i}_{index}'
-                    sis = [key for key in st.session_state if re.search(search_si, key)]
-                    if len(sis) == 1:
-                        si = sis[0]
-                    else:
-                        st.error(sis)
-                    if st.session_state[si] != "":
-                        r.add_picture(f"{st.session_state[si]}", width=Inches(1.2), height=Inches(1.2))
-                        r.add_text(" ")
-
-    with NamedTemporaryFile() as tmp:
-        document.save(tmp.name)
-        tmp.seek(0)
-        stream = tmp.read()
-
-if stream:
-    download = st.download_button(label="Télécharger", data=stream,
-                                  file_name=f"pictortho_{tmp.name.split('.')[0].split('/')[-1]}.docx",
-                                  mime="application/msword")
+elif st.session_state.mode == "dictionnaire":
+    dictionnaire()
 
 for i in range(10):
     st.markdown("")
 
-st.markdown(f'<div style="text-align: center;">Tous pictogrammes présents sur Pictortho proviennent de la base de données d\'<a href="https://arasaac.org">ARASAAC</a> dont les termes d\'utilisations sont accessibles <a href="https://arasaac.org/terms-of-use">ici</a>.</div>', unsafe_allow_html=True)
-st.markdown(f'<div style="text-align: center;">Pictortho est disponible en libre accès sur <a href="https://github.com/victorC97/pictortho">Github</a>.</div>', unsafe_allow_html=True)
+st.markdown(
+    f'<div style="text-align: center;">Tous pictogrammes présents sur Pictortho proviennent de la base de données d\'<a href="https://arasaac.org">ARASAAC</a> dont les termes d\'utilisations sont accessibles <a href="https://arasaac.org/terms-of-use">ici</a>.</div>',
+    unsafe_allow_html=True)
+st.markdown(
+    f'<div style="text-align: center;">Pictortho est disponible en libre accès sur <a href="https://github.com/victorC97/pictortho">Github</a>.</div>',
+    unsafe_allow_html=True)
