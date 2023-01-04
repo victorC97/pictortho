@@ -1,5 +1,10 @@
 # ![logo](./static/logo.svg) Pictortho
 
+## Sommaire
+
+1. [Manuel d'utilisation](#manuel-dutilisation)
+2. [Développeur](#dveloppeur)
+
 ## Manuel d'utilisation
 
 1. Rendez vous sur le [site](https://pictortho.streamlit.app) de Pictortho pour accéder à la page principale [1].
