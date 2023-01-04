@@ -67,7 +67,7 @@ def get_pictos(sentence):
     # Replace verb to standard form
     temp_sentence = copy.deepcopy(sentence)
     temp_sentence = temp_sentence.lower()
-    temp_sentence = [el[:-1] if el[-1] == "." else el for el in re.split(" ", temp_sentence)]
+    temp_sentence = [el[:-1] if el[-1] == "." else el for el in re.split(" ", temp_sentence) if el != ""]
     for j in range(len(temp_sentence)):
         verb_match = st.session_state.verbs[st.session_state.verbs.index.str.fullmatch(temp_sentence[j])]
         if verb_match.shape[0] != 0:

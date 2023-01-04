@@ -3,7 +3,7 @@
 ## Sommaire
 
 1. [Manuel d'utilisation](#manuel-dutilisation)
-2. [Développeur](#dveloppeur)
+2. [Développeur](#développeur)
 
 ## Manuel d'utilisation
 
