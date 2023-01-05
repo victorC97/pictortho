@@ -8,6 +8,7 @@ import copy
 import base64
 import streamlit_select_image as stsi
 from streamlit_elements import elements, mui, html, lazy, sync
+from st_aggrid import AgGrid
 
 # HEADERS AND BEAUTIFY
 st.set_page_config(page_title="Pictortho", layout="wide", page_icon="icon.png")
@@ -52,6 +53,12 @@ if "count" not in st.session_state:
 if "manuel_file" not in st.session_state:
     with open("static/manuel.md", "r") as f:
         st.session_state.manuel_file = f.read()
+
+if "mode" not in st.session_state:
+    st.session_state.mode = "pictortho"
+
+if "dictionnaire_result" not in st.session_state:
+    st.session_state.dictionnaire_result = st.session_state.table.iloc[0:20]
 
 
 # UTILS
@@ -175,16 +182,14 @@ def set_dictionnaire_result(text: str):
 
 def dictionnaire():
     st.markdown("#### Rechercher un pictogramme :")
-    searching_text = st.text_input("Rechercher un pictogramme :", label_visibility="collapsed", key="search_dictionnaire")
-    if len(searching_text) > 1:
+    searching_text = st.text_input("Rechercher un pictogramme :", label_visibility="collapsed",
+                                   key="search_dictionnaire")
+    if searching_text != "":
         set_dictionnaire_result(searching_text)
-        st.table(st.session_state.dictionnaire_result)
+    AgGrid(st.session_state.dictionnaire_result[["Mots écrits", "_id", "Catégories"]])
 
 
 # APP START
-
-if "mode" not in st.session_state:
-    st.session_state.mode = "pictortho"
 
 with elements("app-bar"):
     with mui.Box(sx={"flexGrow": 1}, mx={0}):
@@ -197,39 +202,64 @@ with elements("app-bar"):
                     display="flex", alignItems="center"
                 )
                 mui.Box(
-                    mui.IconButton(
-                        mui.icon.Create,
-                        onClick=lambda: set_mode("pictortho"),
-                        sx={"color": "black"}
+                    mui.Box(
+                        mui.IconButton(
+                            mui.icon.Create,
+                            onClick=lambda: set_mode("pictortho"),
+                            sx={"color": "black"}
+                        ),
+                        mui.Typography(
+                            "Traduire",
+                            variant="h6",
+                            color="black"
+                        ),
+                        display="flex", alignItems="center", sx={"marginRight": "10px"}
                     ),
-                    mui.IconButton(
-                        mui.icon.MenuBook,
-                        onClick=lambda: set_mode("manuel"),
-                        sx={"color": "black"}
+                    mui.Box(
+                        mui.IconButton(
+                            mui.icon.MenuBook,
+                            onClick=lambda: set_mode("manuel"),
+                            sx={"color": "black"}
+                        ),
+                        mui.Typography(
+                            "Manuel",
+                            variant="h6",
+                            color="black"
+                        ),
+                        display="flex", alignItems="center", sx={"marginRight": "10px"}
                     ),
-                    mui.IconButton(
-                        mui.icon.List,
-                        onClick=lambda: set_mode("dictionnaire"),
-                        sx={"color": "black"}
+                    mui.Box(
+                        mui.IconButton(
+                            mui.icon.List,
+                            onClick=lambda: set_mode("dictionnaire"),
+                            sx={"color": "black"}
+                        ),
+                        mui.Typography(
+                            "Index",
+                            variant="h6",
+                            color="black"
+                        ),
+                        display="flex", alignItems="center",
                     ),
-                    display="flex", alignItems="center", justifyContent="space-between", width="200px"
+                    display="flex", alignItems="center", justifyContent="flex-end", width="600px"
                 )
 
-if st.session_state.mode == "pictortho":
-    pictortho_page()
+with st.spinner("Chargement..."):
+    if st.session_state.mode == "pictortho":
+        pictortho_page()
 
-elif st.session_state.mode == "manuel":
-    st.markdown(st.session_state.manuel_file, unsafe_allow_html=True)
+    elif st.session_state.mode == "manuel":
+        st.markdown(st.session_state.manuel_file, unsafe_allow_html=True)
 
-elif st.session_state.mode == "dictionnaire":
-    dictionnaire()
+    elif st.session_state.mode == "dictionnaire":
+        dictionnaire()
 
-for i in range(10):
-    st.markdown("")
+    for i in range(10):
+        st.markdown("")
 
-st.markdown(
-    f'<div style="text-align: center;">Tous pictogrammes présents sur Pictortho proviennent de la base de données d\'<a href="https://arasaac.org">ARASAAC</a> dont les termes d\'utilisations sont accessibles <a href="https://arasaac.org/terms-of-use">ici</a>.</div>',
-    unsafe_allow_html=True)
-st.markdown(
-    f'<div style="text-align: center;">Pictortho est disponible en libre accès sur <a href="https://github.com/victorC97/pictortho">Github</a>.</div>',
-    unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="text-align: center;">Tous pictogrammes présents sur Pictortho proviennent de la base de données d\'<a href="https://arasaac.org">ARASAAC</a> dont les termes d\'utilisations sont accessibles <a href="https://arasaac.org/terms-of-use">ici</a>.</div>',
+        unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="text-align: center;">Pictortho est disponible en libre accès sur <a href="https://github.com/victorC97/pictortho">Github</a>.</div>',
+        unsafe_allow_html=True)
