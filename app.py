@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 import re
 import docx
-from docx.shared import Inches
+from docx.shared import Cm
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from tempfile import NamedTemporaryFile
 import copy
 import base64
@@ -145,10 +146,11 @@ def pictortho_page():
 
     if st.button("Générer"):
         with st.spinner("Génération du document Word..."):
-            document = docx.Document()
-            document.add_heading(title, 0)
+            document = docx.Document("static/template.docx")
+            for p in document.paragraphs:
+                if p.style.name == "Title":
+                    p.text = title
             for key in st.session_state.sentences:
-                document.add_paragraph("").add_run(f"{nb_line}\\.").bold = True
                 document.add_paragraph(st.session_state[f"sentence{key}"])
                 nb_line += 1
                 grid = document.add_paragraph()
@@ -162,8 +164,15 @@ def pictortho_page():
                         else:
                             st.error(sis)
                         if st.session_state[si] != "":
-                            r.add_picture(f"{st.session_state[si]}", width=Inches(1.2), height=Inches(1.2))
-                            r.add_text(" ")
+                            r.add_picture(f"{st.session_state[si]}", width=Cm(3.05), height=Cm(3.05))
+
+            section = document.sections[-1]
+            footer = section.footer
+            p = footer.paragraphs[0]
+            p.text = "Fait grâce à "
+            r = p.add_run()
+            r.add_picture("static/logo.png", width=Cm(1.5), height=Cm(0.96))
+            p.alignement = WD_PARAGRAPH_ALIGNMENT.CENTER
 
         with NamedTemporaryFile() as tmp:
             document.save(tmp.name)
