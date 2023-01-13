@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 import docx
-from docx.shared import Cm
+from docx.shared import Cm, RGBColor
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from tempfile import NamedTemporaryFile
 import copy
@@ -159,6 +159,7 @@ def pictortho_page():
             for p in document.paragraphs:
                 if p.style.name == "Title":
                     p.text = title
+                    p.style.font.color.rgb = RGBColor(0, 0, 0)
             for key in st.session_state.sentences:
                 document.add_paragraph(st.session_state[f"sentence{key}"])
                 nb_line += 1
