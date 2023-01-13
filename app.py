@@ -82,7 +82,7 @@ def get_pictos(sentence: str):
     # Replace verb to standard form
     temp_sentence = copy.deepcopy(sentence)
     temp_sentence = temp_sentence.lower()
-    temp_sentence = [el[:-1] if el[-1] == "." else el for el in re.split(" ", temp_sentence) if el != ""]
+    temp_sentence = [el[:-1] if el[-1] == "." else el for el in re.split(" |'", temp_sentence) if el != ""]
     for j in range(len(temp_sentence)):
         verb_match = st.session_state.verbs[st.session_state.verbs.index.str.fullmatch(temp_sentence[j])]
         if verb_match.shape[0] != 0:
@@ -93,7 +93,11 @@ def get_pictos(sentence: str):
     while j < len(temp_sentence):
         for k in range(0, len(temp_sentence) - j):
             words = " ".join(temp_sentence[j:j + k + 1])
-            find_res = st.session_state.table[st.session_state.table.index.str.fullmatch(words)]
+            if words == "l":
+                find_res = st.session_state.table[st.session_state.table.index.str.fullmatch("le") | st.session_state.table.index.str.fullmatch("la")]
+                words = "l'"
+            else:
+                find_res = st.session_state.table[st.session_state.table.index.str.fullmatch(words)]
             if find_res.shape[0] != 0:
                 if str(j) not in res:
                     res[str(j)] = {"words": words, "data": find_res}
@@ -102,7 +106,7 @@ def get_pictos(sentence: str):
                     if len(words) > len(res[str(j)]["words"]):
                         res[str(j)] = {"words": words, "data": find_res}
         j += len(res[str(j)]["words"].split(" ")) if str(j) in res else 1
-    return [res[key]["data"] for key in res]
+    return [{"words": res[key]["words"], "data": res[key]["data"]} for key in res]
 
 
 def set_mode(mode: str):
@@ -139,10 +143,15 @@ def pictortho_page():
                 for index in range(len(st.session_state.sentences[key]["res"][i:i + 8])):
                     with st.session_state.sentences[key]["columns"][i % 8][index % 8]:
                         infos = st.session_state.sentences[key]["res"][i:i + 8][index]
+                        imgs = []
+                        for l in infos["data"]["Pictogramme"].values:
+                            for el in l:
+                                if el not in imgs:
+                                    imgs.append(el)
                         select_im = stsi.st_select_image(
-                            options=[f"pictos/{info}" for info in infos["Pictogramme"].iloc[0]],
-                            label=f"{infos['Mots écrits'].iloc[0]}", no_choice=True,
-                            key=f"sentence{key}_si_{i}_{index}_{infos['Mots écrits'].iloc[0]}")
+                            options=[f"pictos/{img}" for img in imgs],
+                            label=f"{infos['words']}", no_choice=True,
+                            key=f"sentence{key}_si_{i}_{index}_{infos['words']}")
 
     if st.button("Générer"):
         with st.spinner("Génération du document Word..."):
