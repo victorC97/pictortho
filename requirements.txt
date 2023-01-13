@@ -9,3 +9,4 @@ openpyxl==3.0.10
 streamlit_select_image
 streamlit_elements
 streamlit-aggrid
+Pillow==9.4.0
