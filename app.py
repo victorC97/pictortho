@@ -283,7 +283,6 @@ def tla_page():
                 for i in range(0, nb_col):
                     for j in range(0, nb_row):
                         cell = tla.cell(i, nb_row - j - 1)
-                        print(dir(cell))
                         cell.width = Cm(4.41)
                         p = cell.paragraphs[0]
                         p.add_run(st.session_state[f"grid_text_{i}_{j}"] + "\n\n").bold = True
