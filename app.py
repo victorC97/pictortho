@@ -291,18 +291,19 @@ def tla_page():
                         r = p.add_run("")
                         patrn = f"grid_res_{i}_{j}_"
                         res = [key for key in st.session_state if re.match(patrn, key)]
-                        io_img = BytesIO()
-                        img = Image.open(st.session_state[res[0]]).rotate(270)
-                        img.save(io_img, "PNG")
-                        r.add_picture(io_img, width=Cm(2.5), height=Cm(2.5))
-                        sz = 36
-                        set_cell_border(
-                            cell,
-                            top={"sz": sz, "val": "single", "color": "#000000", "space": "0"},
-                            bottom={"sz": sz, "val": "single", "color": "#000000"},
-                            start={"sz": sz, "val": "single", "color": "#000000"},
-                            end={"sz": sz, "val": "single", "color": "#000000",},
-                        )
+                        if st.session_state[res] != "":
+                            io_img = BytesIO()
+                            img = Image.open(st.session_state[res[0]]).rotate(270)
+                            img.save(io_img, "PNG")
+                            r.add_picture(io_img, width=Cm(2.5), height=Cm(2.5))
+                            sz = 36
+                            set_cell_border(
+                                cell,
+                                top={"sz": sz, "val": "single", "color": "#000000", "space": "0"},
+                                bottom={"sz": sz, "val": "single", "color": "#000000"},
+                                start={"sz": sz, "val": "single", "color": "#000000"},
+                                end={"sz": sz, "val": "single", "color": "#000000",},
+                            )
                         tc = cell._tc
                         tcPr = tc.get_or_add_tcPr()
                         textDirection = OxmlElement('w:textDirection')
