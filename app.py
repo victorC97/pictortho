@@ -291,7 +291,7 @@ def tla_page():
                         r = p.add_run("")
                         patrn = f"grid_res_{i}_{j}_"
                         res = [key for key in st.session_state if re.match(patrn, key)]
-                        if st.session_state[res] != "":
+                        if st.session_state[f"grid_text_{i}_{j}"] != "":
                             io_img = BytesIO()
                             img = Image.open(st.session_state[res[0]]).rotate(270)
                             img.save(io_img, "PNG")
