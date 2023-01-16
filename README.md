@@ -7,6 +7,8 @@
 
 ## Manuel d'utilisation
 
+##### Traduction
+
 1. Rendez vous sur le [site](https://pictortho.streamlit.app) de Pictortho pour accéder à la page principale [1].
 ![homePage](static/homePage.png)
 <p align="center">[1] Page principale de Pictortho</p>
@@ -34,6 +36,28 @@
 7. Générez le document Word [7] en cliquant sur le bouton **Générer** [7], un bouton **Télécharger** apparaît qui vous permet de récuperer le document Word.
 ![dl](static/dl.png)
 <p align="center">[7] Récupérer le document Word de la traduction</p>
+
+##### Tableau de Langage Assisté
+
+1. Cliquez sur le bouton TLA [8] sur la barre de navigation.
+![tlaGo](static/tlaGo.png)
+<p align="center">[8] Accès à la page TLA</p>
+
+2. Sélectionnez le nombre [9] de colonnes et de lignes entre 1 et 6.
+![tlaConfig](static/configgrid.png)
+<p align="center">[9] Configuration des paramètres de la grille</p>
+
+3. Remplissez la grille de mots [10].
+![tlaConfig2](static/configgrid2.png)
+<p align="center">[10] Configuration de la grille de mots</p>
+
+4. Sélectionnez les images [11] à afficher pour chaque mot de la grille.
+![tlaConfigImg](static/configimg.png)
+<p align="center">[11] Sélection des images</p>
+
+5. Cliquez sur le bouton **Générer** [12] et télécharger le document avec le bouton **Télécharger**.
+![generateTla](static/generate.png)
+<p align="center">[12] Génération et téléchargement du document</p>
 
 ## Développeur
 
