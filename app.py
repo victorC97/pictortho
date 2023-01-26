@@ -126,7 +126,7 @@ def get_pictos(sentence: str):
     temp_sentence = copy.deepcopy(sentence)
     temp_sentence = temp_sentence.lower()
     temp_sentence = temp_sentence.replace(" l'", " l' ").replace("j'", "je ")
-    temp_sentence = [el[:-1] if el[-1] == "." else el for el in re.split(" ", temp_sentence) if el != ""]
+    temp_sentence = [el[:-1] if el[-1] == "." or el[-1] == "," else el for el in re.split(" ", temp_sentence) if el != ""]
     # Match words
     res = {}
     j = 0
@@ -137,7 +137,7 @@ def get_pictos(sentence: str):
                 find_res = st.session_state.table[
                     st.session_state.table.index.str.fullmatch("le") | st.session_state.table.index.str.fullmatch("la")]
             else:
-                find_res = st.session_state.table[st.session_state.table.index.str.fullmatch(words)]
+                find_res = st.session_state.table[st.session_state.table.index.str.fullmatch(words.replace("?", "\?"))]
             if find_res.shape[0] != 0:
                 if str(j) not in res:
                     res[str(j)] = {"words": words, "data": find_res}
@@ -162,7 +162,9 @@ def pictortho_page():
 
     stream = None
     nb_line = 1
-    for key in st.session_state.sentences:
+    list_keys = list(st.session_state.sentences.keys())
+    for i in range(len(list_keys)):
+        key = list_keys[i]
         info = st.session_state.sentences[key]
         line = st.columns([33, 1])
         with line[0]:
@@ -170,7 +172,7 @@ def pictortho_page():
                                                                         label_visibility="collapsed",
                                                                         key=f"sentence{key}")
         with line[1]:
-            if info["role"] == "add":
+            if i == len(list_keys) - 1:
                 st.button(label="\+", key="add_sentence", on_click=lambda: add_sentence())
             elif info["role"] == "remove":
                 st.button(label=" \- ", key=f"sentence{key}_remove", on_click=delete_sentence(key))
