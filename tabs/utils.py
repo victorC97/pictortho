@@ -14,8 +14,8 @@ def get_static_file(filename: str):
 
 
 def load_table():
-    st.session_state["table"] = pd.read_csv(get_static_file("table.csv"), sep="\t")
-    st.session_state["table"]["image"] = st.session_state["table"]["image"].apply(lambda img: "pictos/" + img)
+    st.session_state.table = pd.read_csv(get_static_file("table.csv"), sep="\t")
+    st.session_state.table["image"] = st.session_state["table"]["image"].apply(lambda img: "pictos/" + img)
 
 
 def reset(tab: str):
