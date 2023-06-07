@@ -11,3 +11,4 @@ streamlit_elements
 Pillow==9.4.0
 streamlit-freegrid==0.0.3
 streamlit-appbar==0.0.2
+altair==4.0

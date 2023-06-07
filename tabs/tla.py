@@ -47,7 +47,7 @@ def tla():
                     choice = st.selectbox(options=[res[0]["words"]], label=f"tla_choice_{i}_{j}",
                                           label_visibility="collapsed", key=f"tla_choice_{i}_{j}", disabled=True)
                     tla_select_img = stsi.st_select_image(
-                        options=res[0]["data"]["image"].to_list(),
+                        options=list(res[0]["data"]["image"].unique()),
                         label=f"{res[0]['words']}", no_choice=True,
                         key=f"tla_img_{i}_{j}_{res[0]['words']}")
                 else:
@@ -55,7 +55,7 @@ def tla():
                                           label_visibility="collapsed", key=f"tla_choice_{i}_{j}")
                     infos = [el for el in res if el["words"] == choice][0]
                     tla_select_img = stsi.st_select_image(
-                        options=infos["data"]["image"].to_list(),
+                        options=list(infos["data"]["image"].unique()),
                         label=f"{infos['words']}", no_choice=True,
                         key=f"tla_img_{i}_{j}_{infos['words']}")
 
