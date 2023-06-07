@@ -4,6 +4,9 @@ import streamlit as st
 import importlib
 import inspect
 import streamlit_appbar as stab
+
+from tabs.utils import load_table
+
 tabs_modules = list(map(importlib.import_module,
                         ["tabs." + filename.replace(".py", "") for filename in os.listdir("tabs") if
                          filename.replace(".py", "") != "utils"]))
@@ -45,6 +48,8 @@ mode = stab.streamlit_appbar(
     height=90,
     key="mode",
 )
+if "table" not in st.session_state:
+    load_table()
 
 for tab in tabs:
     if mode == tab:

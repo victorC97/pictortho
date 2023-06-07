@@ -75,7 +75,7 @@ def generate_document(title):
                                 words = st.session_state["traduction_sentences"].at[_id, "words"][j]
                                 search_si = f"traduction_sentence_{_id}_{i}_{j % 8}_{words}"
                                 if search_si in st.session_state:
-                                    if st.session_state[search_si] != "":
+                                    if st.session_state[search_si] != "" and st.session_state[search_si] != None:
                                         r.add_picture(f"{st.session_state[search_si]}", width=Cm(3.05), height=Cm(3.05))
                                 j += 1
 
